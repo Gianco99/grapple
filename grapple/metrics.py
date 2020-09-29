@@ -712,8 +712,9 @@ class PapuMetrics(object):
         else:
             self.hists[key] += hist
 
-    def compute(self, yhat, y, w=None, m=None, plot_m=None):
+    def compute(self, yhat, y, pt, eta, phi, puppi, w=None, m=None, plot_m=None):
         y = y.view(-1)
+        puppi = puppi.view(-1)
         if not self.beta:
             yhat = yhat.view(-1)
             loss = self.loss_calc(yhat, y)
@@ -757,7 +758,7 @@ class PapuMetrics(object):
             w = t2n(w).reshape(-1)[plot_m]
         yhat = t2n(yhat)[plot_m]
         n_particles = plot_m.sum()
-
+        puppi = t2n(puppi)[plot_m]
         # let's define positive/negative by >/< 0.5
         y_bin = y > 0.5 
         yhat_bin = yhat > 0.5
@@ -776,14 +777,213 @@ class PapuMetrics(object):
         self.n_particles += n_particles
 
         self.n_steps += 1
+        # Binning yhat and yhat-y (err) by pt,eta, and phi
+        """
+        flattened_pt = np.delete(pt.flatten(), np.where(pt.flatten() == 0))
+        flattened_eta = np.delete(eta.flatten(), np.where(pt.flatten()==0))
+        flattened_phi = np.delete(phi.flatten(), np.where(pt.flatten()==0))
+        err = np.subtract(np.array(yhat),np.array(y))
+        ptbins = [0,10,30,150,190,255,500]
+        etabins = [0,1,2,3,4,5]
+        phibins = [0,1,2,3,4]
+        indices_eta = np.digitize(np.abs(flattened_eta), np.array(etabins))
+        indices_pt = np.digitize(np.array(flattened_pt), np.array(ptbins))
+        indices_phi = np.digitize(np.abs(flattened_phi), np.array(phibins))
+        yhat_1 = []
+        yhat_2 = []
+        yhat_3 = []
+        yhat_4 = []
+        yhat_5 = []
+        yhat_6 = []
+        yhat_eta_1 = []
+        yhat_eta_2 = []
+        yhat_eta_3 = []
+        yhat_eta_4 = []
+        yhat_eta_5 = []
+        yhat_phi_1 = []
+        yhat_phi_2 = []
+        yhat_phi_3 = []
+        yhat_phi_4 = []
+        
+        err_1 = []
+        err_2 = []
+        err_3 = []
+        err_4 = []
+        err_5 = []
+        err_6 = []
+        err_eta_1 = []
+        err_eta_2 = []
+        err_eta_3 = []
+        err_eta_4 = []
+        err_eta_5 = []
+        err_phi_1 = []
+        err_phi_2 = []
+        err_phi_3 = []
+        err_phi_4 = []
 
+        truth_1 = []
+        truth_2 = []
+        truth_3 = []
+        truth_4 = []
+        truth_5 = []
+        truth_6 = []
+        truth_eta_1 = []
+        truth_eta_2 = []
+        truth_eta_3 = []
+        truth_eta_4 = []
+        truth_eta_5 = []
+        truth_phi_1 = []
+        truth_phi_2 = []
+        truth_phi_3 = []
+        truth_phi_4 = []
+        count = 0
+        """
+       # logger.info(f'flattened pt: {flattened_phi}')
+       # logger.info(f'pt flattened shape: {flattened_pt.shape}')
+       # logger.info(f'yhat: {yhat}')
+       # logger.info(f'yhat shape: {yhat.shape}')
+       # logger.info(f'pT: {pt}')
+       # logger.info(f'pT shape: {pt.shape}')
+       # logger.info(f'pT indices: {indices_pt}')
+       # logger.info(f'pT indices shape: {indices_pt.shape}')
+        """ 
+        for ii in indices_pt:
+            if ii == 1:
+                yhat_1.append(yhat[count])
+                truth_1.append(y[count])
+                err_1.append(err[count])
+            if ii == 2:
+                yhat_2.append(yhat[count])
+                truth_2.append(y[count])
+                err_2.append(err[count])
+            if ii == 3:
+                yhat_3.append(yhat[count])
+                truth_3.append(y[count])
+                err_3.append(err[count])
+            if ii == 4:
+                yhat_4.append(yhat[count])
+                truth_4.append(y[count])
+                err_4.append(err[count])
+            if ii == 5:
+                yhat_5.append(yhat[count])
+                truth_5.append(y[count])
+                err_5.append(err[count])
+            if ii == 6:
+                yhat_6.append(yhat[count])
+                truth_6.append(y[count])
+                err_6.append(err[count])
+            count = count + 1
+        
+        count = 0
+
+        for ii in indices_eta:
+            if ii == 1:
+                yhat_eta_1.append(yhat[count])
+                truth_eta_1.append(y[count])
+                err_eta_1.append(err[count])
+            if ii == 2:
+                yhat_eta_2.append(yhat[count])
+                truth_eta_2.append(y[count])
+                err_eta_2.append(err[count])
+            if ii == 3:
+                yhat_eta_3.append(yhat[count])
+                truth_eta_3.append(y[count])
+                err_eta_3.append(err[count])
+            if ii == 4:
+                yhat_eta_4.append(yhat[count])
+                truth_eta_4.append(y[count])
+                err_eta_4.append(err[count])
+            if ii == 5:
+                yhat_eta_5.append(yhat[count])
+                truth_eta_5.append(y[count])
+                err_eta_5.append(err[count])
+            count = count + 1
+        
+        count = 0
+         
+        for ii in indices_phi:
+            if ii == 1:
+                yhat_phi_1.append(yhat[count])
+                truth_phi_1.append(y[count])
+                err_phi_1.append(err[count])
+            if ii == 2:
+                yhat_phi_2.append(yhat[count])
+                truth_phi_2.append(y[count])
+                err_phi_2.append(err[count])
+            if ii == 3:
+                yhat_phi_3.append(yhat[count])
+                truth_phi_3.append(y[count])
+                err_phi_3.append(err[count])
+            if ii == 4:
+                yhat_phi_4.append(yhat[count])
+                truth_phi_4.append(y[count])
+                err_phi_4.append(err[count])
+            count = count + 1 
+        """
         self.add_values(
             y, 'truth', w, -0.2, 1.2) 
         self.add_values(
             yhat, 'pred', w, -0.2, 1.2) 
         self.add_values(
             yhat-y, 'err', w, -2, 2)
+        self.add_values(puppi-y, 'puppi_err', w, -2,2)
+        """   
+        self.add_values(truth_1, 'ptbin_truth[0,10]', None, -.2, 1.2)
+        self.add_values(truth_2, 'ptbin_truth[10,30]', None, -.2, 1.2)
+        self.add_values(truth_3, 'ptbin_truth[30,150]', None, -.2, 1.2)
+        self.add_values(truth_4, 'ptbin_truth[150,190]', None, -.2, 1.2)
+        self.add_values(truth_5, 'ptbin_truth[190,255]', None, -.2, 1.2)
+        self.add_values(truth_6, 'ptbin_truth[255,500]', None, -.2, 1.2)
+        
+        self.add_values(yhat_1, 'ptbin_pred[0,10]', None, -.2, 1.2)
+        self.add_values(yhat_2, 'ptbin_pred[10,30]', None, -.2, 1.2)
+        self.add_values(yhat_3, 'ptbin_pred[30,150]', None, -.2, 1.2)
+        self.add_values(yhat_4, 'ptbin_pred[150,190]', None, -.2, 1.2)
+        self.add_values(yhat_5, 'ptbin_pred[190,255]', None, -.2, 1.2)
+        self.add_values(yhat_6, 'ptbin_pred[255,500]', None, -.2, 1.2)
+        
+        self.add_values(err_1, 'ptbin_err[0,10]', None, -2, 2)
+        self.add_values(err_2, 'ptbin_err[10,30]', None, -2, 2)
+        self.add_values(err_3, 'ptbin_err[30,150]', None, -2, 2)
+        self.add_values(err_4, 'ptbin_err[150,190]', None, -2, 2)
+        self.add_values(err_5, 'ptbin_err[190,255]', None, -2, 2)
+        self.add_values(err_6, 'ptbin_err[255,500]', None, -2, 2)
 
+        self.add_values(truth_eta_1, 'etabin_truth[0,1]', None, -.2, 1.2)
+        self.add_values(truth_eta_2, 'etabin_truth[1,2]', None, -.2, 1.2)
+        self.add_values(truth_eta_3, 'etabin_truth[2,3]', None, -.2, 1.2)
+        self.add_values(truth_eta_4, 'etabin_truth[3,4]', None, -.2, 1.2)
+        self.add_values(truth_eta_5, 'etabin_truth[4,5]', None, -.2, 1.2)
+
+        self.add_values(yhat_eta_1, 'etabin_pred[0,1]', None, -.2, 1.2)
+        self.add_values(yhat_eta_2, 'etabin_pred[1,2]', None, -.2, 1.2)
+        self.add_values(yhat_eta_3, 'etabin_pred[2,3]', None, -.2, 1.2)
+        self.add_values(yhat_eta_4, 'etabin_pred[3,4]', None, -.2, 1.2)
+        self.add_values(yhat_eta_5, 'etabin_pred[4,5]', None, -.2, 1.2)
+        
+        self.add_values(truth_phi_1, 'phibin_truth[0,1]', None, -.2, 1.2)
+        self.add_values(truth_phi_2, 'phibin_truth[1,2]', None, -.2, 1.2)
+        self.add_values(truth_phi_3, 'phibin_truth[2,3]', None, -.2, 1.2)
+        self.add_values(truth_phi_4, 'phibin_truth[3,4]', None, -.2, 1.2)
+
+        self.add_values(yhat_phi_1, 'phibin_pred[0,1]', None, -.2, 1.2)
+        self.add_values(yhat_phi_2, 'phibin_pred[1,2]', None, -.2, 1.2)
+        self.add_values(yhat_phi_3, 'phibin_pred[2,3]', None, -.2, 1.2)
+        self.add_values(yhat_phi_4, 'phibin_pred[3,4]', None, -.2, 1.2)
+
+        self.add_values(err_eta_1, 'etabin_err[0,1]', None, -2, 2)
+        self.add_values(err_eta_2, 'etabin_err[1,2]', None, -2, 2)
+        self.add_values(err_eta_3, 'etabin_err[2,3]', None, -2, 2)
+        self.add_values(err_eta_4, 'etabin_err[3,4]', None, -2, 2)
+        self.add_values(err_eta_5, 'etabin_err[4,5]', None, -2, 2)
+
+        self.add_values(err_phi_1, 'phibin_err[0,1]', None, -2, 2)
+        self.add_values(err_phi_2, 'phibin_err[1,2]', None, -2, 2)
+        self.add_values(err_phi_3, 'phibin_err[2,3]', None, -2, 2)
+        self.add_values(err_phi_4, 'phibin_err[3,4]', None, -2, 2)
+
+        self.add_values(eta, 'eta', None, -6, 6)
+        """
         return loss, acc
 
     def mean(self):
@@ -791,7 +991,582 @@ class PapuMetrics(object):
                  for x in [self.loss, self.acc, self.pos_acc, self.neg_acc]]
                 + [self.n_pos / self.n_particles])
 
-    def plot(self, path):
+    def plot(self, path):   
+        plt.clf()
+        """
+        bins = self.bins['eta']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['eta'], label='Eta', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Eta')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_err[0,1]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_err[0,1]'], label='Err_bin_[0,1]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_phi_1.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_err[1,2]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_err[1,2]'], label='Err_bin_[1,2]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_phi_2.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_err[2,3]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_err[2,3]'], label='Err_bin_[2,3]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_phi_3.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_err[3,4]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_err[3,4]'], label='Err_bin_[3,4]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_phi_4.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_pred[0,1]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_pred[0,1]'], label='Pred_bin_[0,1]', **hist_args)
+        plt.hist(weights=self.hists['phibin_truth[0,1]'], label='Truth_bin_[0,1]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_phi_1.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_pred[1,2]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_pred[1,2]'], label='Pred_bin_[1,2]', **hist_args)
+        plt.hist(weights=self.hists['phibin_truth[1,2]'], label='Truth_bin_[1,2]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_phi_2.' + ext)
+
+        plt.clf()
+        bins = self.bins['phibin_pred[2,3]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_pred[2,3]'], label='Pred_bin_[2,3]', **hist_args)
+        plt.hist(weights=self.hists['phibin_truth[2,3]'], label='Truth_bin_[2,3]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_phi_3.' + ext)
+        
+        plt.clf()
+        bins = self.bins['phibin_pred[3,4]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['phibin_pred[3,4]'], label='Pred_bin_[3,4]', **hist_args)
+        plt.hist(weights=self.hists['phibin_truth[3,4]'], label='Truth_bin_[3,4]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_phi_4.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_err[0,1]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_err[0,1]'], label='Err_bin_[0,1]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_eta_1.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_err[1,2]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_err[1,2]'], label='Err_bin_[1,2]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_eta_2.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_err[2,3]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_err[2,3]'], label='Err_bin_[2,3]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_eta_3.' + ext)
+
+
+        plt.clf()
+        bins = self.bins['etabin_err[3,4]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_err[3,4]'], label='Err_bin_[3,4]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_eta_4.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_err[4,5]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_err[4,5]'], label='Err_bin_[4,5]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_eta_5.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_pred[0,1]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_pred[0,1]'], label='Pred_bin_[0,1]', **hist_args)
+        plt.hist(weights=self.hists['etabin_truth[0,1]'], label='Truth_bin_[0,1]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta_1.' + ext)
+        
+        plt.clf()
+        bins = self.bins['etabin_pred[1,2]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_pred[1,2]'], label='Pred_bin_[1,2]', **hist_args)
+        plt.hist(weights=self.hists['etabin_truth[1,2]'], label='Truth_bin_[1,2]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta_2.' + ext)
+        
+        plt.clf()
+        bins = self.bins['etabin_pred[2,3]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_pred[2,3]'], label='Pred_bin_[2,3]', **hist_args)
+        plt.hist(weights=self.hists['etabin_truth[2,3]'], label='Truth_bin_[2,3]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta_3.' + ext)
+        
+        plt.clf()
+        bins = self.bins['etabin_pred[3,4]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_pred[3,4]'], label='Pred_bin_[3,4]', **hist_args)
+        plt.hist(weights=self.hists['etabin_truth[3,4]'], label='Truth_bin_[3,4]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta_4.' + ext)
+
+        plt.clf()
+        bins = self.bins['etabin_pred[4,5]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['etabin_pred[4,5]'], label='Pred_bin_[4,5]', **hist_args)
+        plt.hist(weights=self.hists['etabin_truth[4,5]'], label='Truth_bin_[4,5]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_eta_5.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_err[0,10]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[0,10]'], label='Err_bin_[0,10]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_1.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_err[10,30]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[10,30]'], label='Err_bin_[10,30]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_2.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_err[30,150]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[30,150]'], label='Err_bin_[30,150]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_3.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_err[150,190]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[150,190]'], label='Err_bin_[150,190]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_4.' + ext)
+        
+        plt.clf()
+        bins = self.bins['ptbin_err[190,255]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[190,255]'], label='Err_bin_[190,255]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_5.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_err[255,500]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_err[255,500]'], label='Err_bin_[255,500]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'Prediction - Truth')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_err_e_6.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_pred[0,10]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[0,10]'], label='Pred_bin_[0,10]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[0,10]'], label='Truth_bin_[0,10]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_1.' + ext)
+        
+        plt.clf()
+        bins = self.bins['ptbin_pred[10,30]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[10,30]'], label='Pred_bin_[10,30]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[10,30]'], label='Truth_bin_[10,30]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_2.' + ext)
+
+        plt.clf()
+        bins = self.bins['ptbin_pred[30,150]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[30,150]'], label='Pred_bin_[30,150]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[30,150]'], label='Truth_bin_[30,150]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_3.' + ext)
+    
+        plt.clf()
+        bins = self.bins['ptbin_pred[150,190]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[150,190]'], label='Pred_bin_[150,190]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[150,190]'], label='Truth_bin_[150,190]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_4.' + ext)
+        
+        plt.clf()
+        bins = self.bins['ptbin_pred[190,255]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[190,255]'], label='Pred_bin_[190,255]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[190,255]'], label='Truth_bin_[190,255]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_5.' + ext)
+        
+        plt.clf()
+        bins = self.bins['ptbin_pred[255,500]']
+        x = (bins[:-1] + bins[1:]) * 0.5
+        hist_args = {
+                'histtype': 'step',
+                #'alpha': 0.25,
+                'bins': bins,
+                'log': True,
+                'x': x,
+                'density': True
+            }
+        plt.hist(weights=self.hists['ptbin_pred[255,500]'], label='Pred_bin_[255,500]', **hist_args)
+        plt.hist(weights=self.hists['ptbin_truth[255,500]'], label='Truth_bin_[255,500]', **hist_args)
+        plt.ylim(bottom=0.001, top=5e3)
+        plt.xlabel(r'$E_{\mathrm{hard}}/E_{\mathrm{tot.}}$')
+        plt.legend()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_e_6.' + ext)
+        """
         plt.clf()
         bins = self.bins['truth'] 
         x = (bins[:-1] + bins[1:]) * 0.5
@@ -812,6 +1587,7 @@ class PapuMetrics(object):
             plt.savefig(path + '_e.' + ext)
 
         plt.clf()
+        ax = plt.subplot(111)
         bins = self.bins['err'] 
         x = (bins[:-1] + bins[1:]) * 0.5
         hist_args = {
@@ -822,13 +1598,18 @@ class PapuMetrics(object):
                 'x': x,
                 'density': True
             }
-        plt.hist(weights=self.hists['err'], label='Error', **hist_args)
+        plt.hist(weights=self.hists['err'], label='Model Error', **hist_args)
+        plt.hist(weights=self.hists['puppi_err'], label = 'Puppi Error', **hist_args)
         plt.ylim(bottom=0.001, top=5e3)
+        plt.xlim(-1.5,1.5)
+        plt.title(r'PUMA: Pileup Mitigation Using Attention')
         plt.xlabel(r'Prediction - Truth')
+        plt.ylabel(r'Entries')
         plt.legend()
+        plt.text(0.05, 0.95, '$n_{PU}=140$', transform = ax.transAxes)
+        plt.text(0.05, 0.85, '$\sqrt{s} = 14$ TeV', transform = ax.transAxes)
         for ext in ('pdf', 'png'):
-            plt.savefig(path + '_err.' + ext)
-
+            plt.savefig(path + '_err_final.' + ext)
 
 class PapuMetricsKL(object):
     def __init__(self, beta=False):
@@ -1139,6 +1920,8 @@ class ParticleUResponse(METResolution):
         self.df_puppi.to_csv(path+'_puppi.csv',index=False)
 
         plt.clf()
+        
+        bins = np.linspace(0., 300., num=25)
 
         #print(resp_df_binned)
         #print(self.xedges)
@@ -1152,6 +1935,9 @@ class ParticleUResponse(METResolution):
         resp_model = np.array(upar_df_model_binned['upar'].values)/np.array(genm_df_model_binned['x'].values)
         resp_truth = np.array(upar_df_truth_binned['upar'].values)/np.array(genm_df_truth_binned['x'].values)
         resp_puppi = np.array(upar_df_puppi_binned['upar'].values)/np.array(genm_df_puppi_binned['x'].values)
+        
+        midpoint_bins = (bins[1:] + bins[:-1])*.5
+
         print(resp_model)
         print(upar_df_model_binned)
         print(genm_df_model_binned)
@@ -1164,9 +1950,27 @@ class ParticleUResponse(METResolution):
         for i in upar_df_model_binned['bin'].values:
             binid_to_genm.append(self.xedges[i-1])
 
+        bcount_model = np.bincount(np.array(self.df_model['bin']))[1:]
+        bcount_puppi = np.bincount(np.array(self.df_puppi['bin']))[1:]
+        bcount_truth = np.bincount(np.array(self.df_truth['bin']))[1:]
+        logger.info(f'{bcount_model}')
         plt.clf()
         fig, ax = plt.subplots()
-        plt.plot(binid_to_genm, (-1)*resp_model, label = "Model", marker='o')
+        plt.plot(bins, bcount_model, label = 'Model')
+        #plt.plot(bins, bcount_puppi, label = 'Puppi')
+        #plt.plot(bins, bcount_truth, label = 'Truth')
+        plt.legend()
+        plt.xlim(0,300)
+        plt.xlabel(r'Z $p_\mathrm{T}$ (GeV)')
+        plt.ylabel(r'Bin Counts')
+        fig.tight_layout()
+        for ext in ('pdf', 'png'):
+            plt.savefig(path + '_bincount.' + ext)
+
+        plt.clf()
+        fig, ax = plt.subplots()
+        plt.plot(binid_to_genm,((-1)*resp_puppi)/((-1)*resp_model)*((-1)*resp_model), label = "Model - Scaled", marker='o')
+        plt.plot(binid_to_genm, (-1)*resp_model, label = "Model - Unscaled", marker='o')
         plt.plot(binid_to_genm, (-1)*resp_truth, label = "Truth", marker='o')
         plt.plot(binid_to_genm, (-1)*resp_puppi, label = "PUPPI", marker='o')
         plt.legend()
@@ -1178,17 +1982,20 @@ class ParticleUResponse(METResolution):
 
 
         plt.clf()
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(2, sharex = True)
         #plt.plot((self.xedges[1:] + self.xedges[:-1]) / 2, resp_df_binned, label = "Model", marker='o')
         #plt.plot((self.xedges[1:] + self.xedges[:-1]) / 2, resp_df_p_binned, label = "PUPPI", marker='o')
-        plt.plot(binid_to_genm, np.array(std_df_model_binned['uper'].values)/((-1)*resp_model), label = "Model", marker='o')
-        plt.plot(binid_to_genm, np.array(std_df_truth_binned['uper'].values)/((-1)*resp_truth), label = "Truth", marker='o')
-        plt.plot(binid_to_genm, np.array(std_df_puppi_binned['uper'].values)/((-1)*resp_puppi), label = "PUPPI", marker='o')
-        plt.legend()
-        plt.xlabel(r'Z $p_\mathrm{T}$ (GeV)')
-        plt.ylabel(r'$\sigma(U_\mathrm{perp})$/(<$U_\mathrm{II}$>/<Z $p_\mathrm{T}$>)')
-        fig.tight_layout()
+        ax[0].plot(binid_to_genm,((-1)*resp_puppi)/((-1)*resp_model)*np.array(std_df_model_binned['uper'].values)/((-1)*resp_model), label = "Model - Scaled", marker='o')
+        ax[0].plot(binid_to_genm,np.array(std_df_model_binned['uper'].values)/((-1)*resp_model), label = "Model - Unscaled", marker='o')
+        ax[0].plot(binid_to_genm, np.array(std_df_truth_binned['uper'].values)/((-1)*resp_truth), label = "Truth", marker='o')
+        ax[0].plot(binid_to_genm, np.array(std_df_puppi_binned['uper'].values)/((-1)*resp_puppi), label = "PUPPI", marker='o')
+        ax[0].set(xlabel = r'Z $p_\mathrm{T}$ (GeV)', ylabel = r'$\sigma(U_\mathrm{perp})$/(<$U_\mathrm{II}$>/<Z $p_\mathrm{T}$>)')
+        ax[1].plot(binid_to_genm, ((np.array(std_df_puppi_binned['uper'].values)/((-1)*resp_puppi)) - (np.array(std_df_truth_binned['uper'].values)/((-1)*resp_truth))) / ((np.array(std_df_model_binned['uper'].values)/((-1)*resp_model)) -  (np.array(std_df_truth_binned['uper'].values)/((-1)*resp_truth))), label = "(Puppi - Truth)/(Model - Truth)", marker = 'o')
+        ax[1].set(xlabel = r'Z $p_\mathrm{T}$ (GeV)', ylabel = '(Puppi - Truth)/(Model - Truth)')
+        ax[1].legend()
+        ax[0].legend()
+        #fig.tight_layout()
         for ext in ('pdf', 'png'):
-            plt.savefig(path + '_perp.' + ext)
+            plt.savefig(path + '_perp_scaled.' + ext)
 
         return {'model': (1, np.sqrt(1)), 'puppi': (1, np.sqrt(1))}
